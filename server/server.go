@@ -48,9 +48,8 @@ func (s *server) LogsHandler(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, http.StatusText(http.StatusBadRequest))
 	}
 
-	if _, ok := s.unique.Load(request.IP); !ok {
-		// not found means this IP was never seen by the service
-		s.unique.Store(request.IP, true)
+	if _, loaded := s.unique.LoadOrStore(request.IP, true); !loaded {
+		// not loaded means this IP was never seen by the service
 		s.m.UniqueIPsInc()
 	}
 
